@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Matrix</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #accef0;
+        }
+        .co
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .btn-primary, .btn-success, .btn-danger {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <form action="{{ url_for('summary', risks=risks) }}" method="GET">
+        <table class="table table-bordered table-dark">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    {% for risk in risks %}
+                        <th scope="col">{{ risk.name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for risk_row in risks %}
+                    <tr>
+                        <th scope="row">{{ risk_row.name }}</th>
+                        {% for risk_col in risks %}
+                            <td>
+                                <input type="number" class="form-control" 
+                                       value="0"
+                                       id="{{ risk_row.name }}-{{ risk_col.name }}"
+                                       name="{{ risk_row.name }}-{{ risk_col.name }}"
+                                       step="1" min="0" max="1" />
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-3 text-center">
+            <input type="submit" value="Wygeneruj przebiegi zdarzeń niekorzystnych" class="btn btn-primary">
+        </div>
+    </form>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
