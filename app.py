@@ -118,7 +118,7 @@ def summary():
             user_value = float(request.args.get(input_name, 0))
             row_values.append(user_value)
         relations_between_dangers.append(row_values)
-    for i in range(10000):
+    for i in range(100000):
         starting_danger = choose_danger(potential_dangers_TEST, starting_probability_TEST)
         execute_danger(starting_danger, potential_dangers_TEST, probability_of_potential_dangers_TEST, relations_between_dangers)
         defense_system(potential_dangers_TEST, executed_dangers, probability_of_defense_TEST)

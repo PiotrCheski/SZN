@@ -111,8 +111,9 @@
             <button type="submit" class="btn btn-primary">Dodaj ryzyko</button>
         </form>
         <form action="/" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".xlsx, .xls">
-            <button type="submit">Upload</button>
+            <label for="formFile" class="form-label">Wybierz plik</label>
+            <input class="form-control" type="file" name="file" accept=".xlsx, .xls">
+            <button type="submit" class="btn btn-primary">Prześlij plik</button>
         </form>
         <a href="{{ url_for('matrix') }}" class="btn btn-success mt-3">Przejdź do macierzy zależności</a>
 
