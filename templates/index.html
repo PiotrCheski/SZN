@@ -115,7 +115,13 @@
             <input class="form-control" type="file" name="file" accept=".xlsx, .xls">
             <button type="submit" class="btn btn-primary">Prześlij plik</button>
         </form>
-        <a href="{{ url_for('matrix') }}" class="btn btn-success mt-3">Przejdź do macierzy zależności</a>
+        <form action="{{ url_for('matrix') }}" method="GET">
+            <label for="iterations" class="form-label">Liczba iteracji:</label>
+            <input class="form-control" type="number" name="iterations" id="iterations" min="1" required>
+            <button type="submit" class="btn btn-success mt-3">Przejdź do macierzy zależności</button>
+        </form>
+        
+
 
         <hr>
 

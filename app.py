@@ -52,9 +52,12 @@ def delete_all_risks():
     risks.clear()
     return redirect(url_for('index'))
 
+NUM_OF_ITERATIONS = 1
 
 @app.route('/matrix', methods=['GET'])
 def matrix():
+    global NUM_OF_ITERATIONS 
+    NUM_OF_ITERATIONS = int(request.args.get('iterations', 1))  # Domyślnie 1 iteracja
     risk_matrix = generate_risk_matrix(risks)    
     return render_template('matrix.html', risks=risks, risk_matrix=risk_matrix)
 
@@ -75,7 +78,6 @@ def choose_danger(potential_dangers, probability_of_potential_dangers_TEST):
     danger = random.choices(potential_dangers, weights=probability_of_potential_dangers_TEST, k=1)[0]
     raised_dangers.append(danger)
     return danger
-
 
 raised_dangers = []
 executed_dangers = []
@@ -131,7 +133,7 @@ def summary():
             user_value = float(request.args.get(input_name, 0))
             row_values.append(user_value)
         relations_between_dangers.append(row_values)
-    for i in range(1000):
+    for i in range(NUM_OF_ITERATIONS):
         starting_danger = choose_danger(potential_dangers_TEST, starting_probability_TEST)
         execute_danger(starting_danger, potential_dangers_TEST, probability_of_potential_dangers_TEST, relations_between_dangers)
         defense_system(potential_dangers_TEST, executed_dangers, probability_of_defense_TEST)
