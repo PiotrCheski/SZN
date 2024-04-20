@@ -97,15 +97,15 @@
                 <input type="text" class="form-control" id="name" name="name" required>
             </div>
             <div class="mb-3">
-                <label for="initial_probability" class="form-label">Prawdopodobieństwo wystąpienia (0-1):</label>
+                <label for="initial_probability" class="form-label">Prawdopodobieństwo wzbudzenia (0-1):</label>
                 <input type="number" class="form-control" id="initial_probability" name="initial_probability" step="0.01" min="0" max="1" required>
             </div>
             <div class="mb-3">
-                <label for="occurrence_probability" class="form-label">Podatność na dane ryzyko (0-1):</label>
+                <label for="occurrence_probability" class="form-label">Prawdopdobieństwo materializacji (0-1):</label>
                 <input type="number" class="form-control" id="occurrence_probability" name="occurrence_probability" step="0.01" min="0" max="1" required>
             </div>
             <div class="mb-3">
-                <label for="defense_probability" class="form-label">Prawdopodobieństwo obrony (0-1):</label>
+                <label for="defense_probability" class="form-label">Podatność (0-1):</label>
                 <input type="number" class="form-control" id="defense_probability" name="defense_probability" step="0.01" min="0" max="1" required>
             </div>
             <button type="submit" class="btn btn-primary">Dodaj ryzyko</button>
@@ -120,19 +120,20 @@
         <hr>
 
         <h2 class="mt-4">Dodane ryzyka</h2>
-
+        <form method="POST" action="{{ url_for('delete_all_risks') }}">
+            <button type="submit" class="btn btn-danger mb-3">Usuń wszystkie ryzyka</button>
+        </form>
         <ul class="list-group">
             {% for risk in risks %}
                 <li class="list-group-item">
                     <strong>{{ risk.name }}</strong>
                     <br>
-                    Prawdopodobieństwo startowe wśród innych ryzyk: {{ risk.initial_probability }}
+                    Prawdopodobieństwo wzbudzenia: {{ risk.initial_probability }}
                     <br>
-                    Prawdopodobieństwo wywołania ryzyka: {{ risk.occurrence_probability }}
+                    Prawdopodobieństwo materializacji: {{ risk.occurrence_probability }}
                     <br>
-                    Prawdopdobieństwo obrony: {{ risk.defense_probability }}
+                    Podatność: {{ risk.defense_probability }}
                     
-                    <!-- Dodaj przycisk do usuwania ryzyka -->
                     <br>
                     <form method="POST" action="{{ url_for('delete_risk', index=loop.index0) }}" style="display: inline;">
                         <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
@@ -140,7 +141,6 @@
                 </li>
             {% endfor %}
         </ul>
-
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

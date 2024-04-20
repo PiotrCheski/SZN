@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 import random
 import pandas as pd
 from datetime import datetime
@@ -11,16 +11,16 @@ risks = []
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        if 'file' in request.files:  # Sprawdzenie, czy przesłano plik
+        if 'file' in request.files:
             file = request.files['file']
             if file.filename != '':
                 df = pd.read_excel(file)
                 for _, row in df.iterrows():
                     risk = {
-                        'name': row['A'],
-                        'initial_probability': row['B'],
-                        'occurrence_probability': row['C'],
-                        'defense_probability': row['D']
+                        'name': row['Nazwa'],
+                        'initial_probability': row['Wzbudzenie [0-1]'],
+                        'occurrence_probability': row['Materializacja [0-1]'],
+                        'defense_probability': row['Podatnosc [0-1]']
                     }
                     risks.append(risk)
         else:  # Jeśli dane zostały przesłane przez formularz
@@ -47,6 +47,12 @@ def delete_risk(index):
 
     return redirect(url_for('index'))
 
+@app.route('/delete_all_risks', methods=['POST'])
+def delete_all_risks():
+    risks.clear()
+    return redirect(url_for('index'))
+
+
 @app.route('/matrix', methods=['GET'])
 def matrix():
     risk_matrix = generate_risk_matrix(risks)    
@@ -65,13 +71,15 @@ def generate_risk_matrix(risks):
             matrix[row['name']][col['name']] = round(initial_probability * occurrence_probability, 2)
     return matrix
 
-
 def choose_danger(potential_dangers, probability_of_potential_dangers_TEST):
-    danger = random.choices(potential_dangers, probability_of_potential_dangers_TEST, k = 1)
-    return danger[0]
+    danger = random.choices(potential_dangers, weights=probability_of_potential_dangers_TEST, k=1)[0]
+    raised_dangers.append(danger)
+    return danger
 
 
+raised_dangers = []
 executed_dangers = []
+successful_dangers = []
 records = {
 }
 
@@ -82,23 +90,28 @@ def execute_danger(starting_danger, potential_dangers_TEST, probability_of_poten
         executed_dangers.append(starting_danger)
         for jdx, value in enumerate(relations_between_dangers[idx]):
             if (jdx != idx) and value == 1:
+                raised_dangers.append(potential_dangers_TEST[jdx])
                 execute_danger(potential_dangers_TEST[jdx], potential_dangers_TEST, probability_of_potential_dangers_TEST, relations_between_dangers)     
 
 def defense_system(potential_dangers, executed_dangers, probability_of_defense):
-    successful_dangers = ""
     for danger in executed_dangers:
         idx = potential_dangers.index(danger)
         random_float = random.uniform(0, 1)
-        if random_float >= probability_of_defense[idx]:
-            successful_dangers += f' {danger},'
-    key = tuple(executed_dangers + [successful_dangers])
+        if random_float <= probability_of_defense[idx]:
+            successful_dangers.append(danger)
+            
+    key_list = []
+    key_list.extend(("Wzbudzone", danger) for danger in raised_dangers)
+    key_list.extend(("Wykonane", danger) for danger in executed_dangers)
+    key_list.extend(("Sukces", danger) for danger in successful_dangers)
+    key = tuple(key_list)
     if key not in records:
         records[key] = 1
     else:
         records[key] += 1
 
 def reset_variables(reset_variables):
-    executed_dangers.clear()
+    reset_variables.clear()
 
 @app.route('/summary', methods=['GET'])
 def summary():
@@ -118,23 +131,53 @@ def summary():
             user_value = float(request.args.get(input_name, 0))
             row_values.append(user_value)
         relations_between_dangers.append(row_values)
-    for i in range(100000):
+    for i in range(1000):
         starting_danger = choose_danger(potential_dangers_TEST, starting_probability_TEST)
         execute_danger(starting_danger, potential_dangers_TEST, probability_of_potential_dangers_TEST, relations_between_dangers)
         defense_system(potential_dangers_TEST, executed_dangers, probability_of_defense_TEST)
+        reset_variables(raised_dangers)
         reset_variables(executed_dangers)
-       # Extract information from the keys
+        reset_variables(successful_dangers)
+
+    # Extract information from the keys
+    # Inicjalizacja trzech list jako 'Brak'
+    raised_dangers_EXCEL = []
     executed_dangers_EXCEL = []
     successfully_executed_dangers_EXCEL = []
     count = []
 
+    # Iteracja po parach klucz-wartość w słowniku `records`
     for key, value in records.items():
-        executed_dangers_EXCEL.append(', '.join(key[:-1]))  # Exclude the last element
-        successfully_executed_dangers_EXCEL.append(', '.join(key[-1].split(', ')))  # Split the string and join back with commas
+        local_wzbudzone = []
+        local_executed = []
+        local_successful = []
+        wzbudzone_found = False
+        executed_found = False
+        success_found = False
+        for pair in key:
+            if pair[0] == 'Wzbudzone':
+                local_wzbudzone.append(pair[1])
+                wzbudzone_found = True
+            elif pair[0] == 'Wykonane':
+                local_executed.append(pair[1])
+                executed_found = True
+            elif pair[0] == 'Sukces':
+                local_successful.append(pair[1])
+                success_found = True
+        if not wzbudzone_found:
+            local_wzbudzone.append('Brak')
+        if not executed_found:
+            local_executed.append('Brak')
+        if not success_found:
+            local_successful.append('Brak')
+        raised_dangers_EXCEL.append(local_wzbudzone)
+        executed_dangers_EXCEL.append(local_executed)
+        successfully_executed_dangers_EXCEL.append(local_successful)
         count.append(value)
-    
+
     # Create a DataFrame
     df = pd.DataFrame({
+        'Wzbudzone zagrożenia': raised_dangers_EXCEL,
         'Materializacja ryzyka': executed_dangers_EXCEL,
         'Obiekt skutecznie naruszony przez zagrożenie (środki ochronne zawiodły)': successfully_executed_dangers_EXCEL,
         'Liczba wystąpień': count
@@ -151,14 +194,9 @@ def summary():
 
     # Construct filename with current time
     filename = f'output_{current_time_formatted}.xlsx'
-
-    # Save DataFrame to Excel with the constructed filename
     df.to_excel(filename, index=False)
-    
-    return render_template('summary.html')
-
- 
-
+    # Save DataFrame to Excel with the constructed filename
+    return send_file(filename, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
