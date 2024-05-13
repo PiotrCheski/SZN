@@ -11,7 +11,7 @@ git clone https://github.com/PiotrCheski/SZN.git
 Navigate into the project directory:
 
 ```bash
-cd your-flask-app
+cd SZN
 ```
 
 Create a virtual environment to isolate project dependencies:
