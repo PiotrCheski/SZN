@@ -1,7 +1,3 @@
-# Disclaimer
-
-
-
 ## Installation
 
 ```bash
