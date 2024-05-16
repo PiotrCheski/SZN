@@ -23,7 +23,7 @@ def index():
                         'defense_probability': row['Podatnosc [0-1]']
                     }
                     risks.append(risk)
-        else:  # Jeśli dane zostały przesłane przez formularz
+        else:
             name = request.form['name']
             initial_probability = request.form['initial_probability']
             occurrence_probability = request.form['occurrence_probability']
@@ -66,11 +66,9 @@ def generate_risk_matrix(risks):
     for row in risks:
         matrix[row['name']] = {}
         for col in risks:
-            # Convert probability values to floats
             initial_probability = float(row['initial_probability'])
             occurrence_probability = float(col['occurrence_probability'])
             
-            # Compute the combination of probabilities (customize this according to your needs)
             matrix[row['name']][col['name']] = round(initial_probability * occurrence_probability, 2)
     return matrix
 
@@ -123,8 +121,6 @@ def summary():
     probability_of_potential_dangers_TEST = [float(risk['occurrence_probability']) for risk in risks]
     probability_of_defense_TEST = [float(risk['defense_probability']) for risk in risks]
         
-    # Fetch relations_between_dangers from the form data (example structure)
-    # You may need to adjust this based on the actual structure of your data
     relations_between_dangers = []
     for risk_row in risks:
         row_values = []
@@ -141,14 +137,11 @@ def summary():
         reset_variables(executed_dangers)
         reset_variables(successful_dangers)
 
-    # Extract information from the keys
-    # Inicjalizacja trzech list jako 'Brak'
     raised_dangers_EXCEL = []
     executed_dangers_EXCEL = []
     successfully_executed_dangers_EXCEL = []
     count = []
 
-    # Iteracja po parach klucz-wartość w słowniku `records`
     for key, value in records.items():
         local_wzbudzone = []
         local_executed = []
@@ -177,7 +170,6 @@ def summary():
         successfully_executed_dangers_EXCEL.append(local_successful)
         count.append(value)
 
-    # Create a DataFrame
     df = pd.DataFrame({
         'Wzbudzone zagrożenia': raised_dangers_EXCEL,
         'Materializacja ryzyka': executed_dangers_EXCEL,
@@ -188,13 +180,10 @@ def summary():
     sum_count = df['Liczba wystąpień'].sum()
     df['Udział procentowy [%]'] = ((df['Liczba wystąpień'] / sum_count) * 100).round(1)
     df = df.sort_values(by='Liczba wystąpień', ascending=False)
-    # Get current time
     current_time = datetime.now()
 
-    # Format current time to include hour and seconds
     current_time_formatted = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-    # Construct filename with current time
     filename = f'output_{current_time_formatted}.xlsx'
     df.to_excel(filename, index=False)
     # Save DataFrame to Excel with the constructed filename

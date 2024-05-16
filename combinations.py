@@ -27,13 +27,10 @@ df.index += 1
 print(df)
 decyzje = [f"Decyzja {i+1}" for i in range(len(df))]
 
-# Wstaw kolumnę "Decyzja" jako pierwszą kolumnę
 df.insert(0, "Decyzja", decyzje)
 
-# Ścieżka do pliku Excel
 excel_file_path = "combinations.xlsx"
 
-# Zapisz ramkę danych do pliku Excel
 df.to_excel(excel_file_path, index=False)
 
 print("Dane zostały zapisane do pliku Excel o nazwie 'combinations.xlsx'.")
