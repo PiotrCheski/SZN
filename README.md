@@ -34,10 +34,6 @@ Install the required dependencies:
 pip install -r requirements.txt
 ```
 
-## Configuration
-
-Before running the application, you may need to configure some settings. Most configurations can be found in the `config.py` file.
-
 ## Running the Application
 
 Once the installation and configuration steps are complete, you can run the Flask application. Make sure you are in the project directory and your virtual environment is activated.
